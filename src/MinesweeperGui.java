@@ -2,29 +2,41 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 public class MinesweeperGui {
-    final int boardHeight = 20;
-    final int boardWidth = 50;
+    final int boardHeight = 30;
+    final int boardWidth = 20;
     MinesweeperBoard gameBoard = new MinesweeperBoard(boardHeight, boardWidth);
-    JButton[][] boardButtons = new JButton[boardHeight][boardWidth];
+    GUIBoardButton[][] boardButtons = new GUIBoardButton[boardHeight][boardWidth];
     ActionListener actionListener;
-
-    int iconSize = 15;
-    Icon white_icon = new ImageIcon(new BufferedImage(iconSize, iconSize, BufferedImage.TYPE_INT_ARGB));
-    Icon black_icon = new ImageIcon(new BufferedImage(iconSize, iconSize, BufferedImage.TYPE_INT_RGB));
+    boolean rightClick = false;
+    MouseListener mouseListener = new MouseAdapter() {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            super.mousePressed(e);
+            if(e.getButton() == 3) {
+                boardButtonOnClick((JToggleButton)e.getSource(),false);
+                rightClick = true;
+            }
+        }
+    };
     MinesweeperGui() {
         JPanel gui = new JPanel(new BorderLayout(0,0));
         gui.setBorder(new EmptyBorder(4,4,4,4));
         JPanel gameContainer = new JPanel(new GridLayout(boardHeight, boardWidth,0,0));
         gui.add(gameContainer);
-        actionListener = e -> boardButtonOnClick((JButton)e.getSource());
+
+        actionListener = e -> boardButtonOnClick((JToggleButton)e.getSource(),true);
         for (int i = 0; i< boardHeight; i++) {
             for(int j = 0; j < boardWidth; j++) {
-                JButton b = prepareAButton();
-                gameContainer.add(b);
-                boardButtons[i][j] = b;
+                GUIBoardButton button = new GUIBoardButton(i,j,actionListener);
+                button.button.addMouseListener(mouseListener);
+                boardButtons[i][j] = button;
+                gameContainer.add(button.button);
             }
         }
         JPanel pane = new JPanel();
@@ -45,20 +57,30 @@ public class MinesweeperGui {
         f.setVisible(true);
     }
 
-    private JButton prepareAButton() {
-        JButton b = new JButton();
-        b.setIcon(white_icon);
-        b.setMargin(new Insets(0,0,0,0));
-        b.setContentAreaFilled(true);
-        b.addActionListener(actionListener);
-        return b;
-    }
-
-    private void boardButtonOnClick(JButton button) {
+    private void boardButtonOnClick(JToggleButton button, boolean leftClick) {
         for (int i = 0; i< boardHeight; i++) {
             for (int j = 0; j< boardWidth; j++) {
-                if (button.equals(boardButtons[i][j])) {
-                    JButton current = boardButtons[i][j];
+                if (button.equals(boardButtons[i][j].button)) {
+                    GUIBoardButton current = boardButtons[i][j];
+                    if(leftClick){
+                        if(current.state!= ButtonState.Pushed){
+                            BoardCell curr = gameBoard.getValue(i,j);
+                            if(curr.isMine())
+                                //clicked mine
+                                current.setIcon(MyIcon.Mine);
+                            else{
+                                int number_of_adjacent_mines = gameBoard.numberOfMines(i,j);
+                                current.button.setText(String.valueOf(number_of_adjacent_mines));
+                                ButtonModel model = current.button.getModel();
+                                model.setPressed(true);
+                                button.setModel(model);
+                                current.state = ButtonState.Pushed;
+                            }
+                        }
+                    }
+                    else {
+                        current.rightClick();
+                        }
                     }
                 }
             }
@@ -69,7 +91,6 @@ public class MinesweeperGui {
             for(int j = 0; j < boardWidth; j++)
             {
                 gameBoard.resetBoard();
-                boardButtons[i][j].setIcon(white_icon);
             }
     }
     public static void main(String[] args) {

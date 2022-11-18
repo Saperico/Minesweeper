@@ -4,11 +4,13 @@ public class MinesweeperBoard {
     private final int height;
     private final int width;
     private final BoardCell[][] gameBoard;
+    private final int numberOfBombs;
 
     public MinesweeperBoard(int height, int width){
         this.height = height;
         this.width = width;
         this.gameBoard = new BoardCell[height][width];
+        numberOfBombs = height*width/2;
         setUpBoard();
     }
 
@@ -25,7 +27,7 @@ public class MinesweeperBoard {
             for(int j = 0 ; j < width ; j++)
             {
                 double random = new Random().nextDouble();
-                if(random<0.5)
+                if(random<0.1)
                     gameBoard[i][j].setMine();
             }
         }
@@ -41,14 +43,14 @@ public class MinesweeperBoard {
         }
     }
 
-    private int numberOfNeighbors(int x, int y){
+    public int numberOfMines(int x, int y){
         int numberOfNeighbors = 0;
         for(int i = -1 ; i < 2; i++){
             for(int j = -1 ; j < 2; j++){
                 if(i!=0 || j != 0)
                     if(x+i < height & x+i >= 0 & y+j < width & y+j>=0){
                         BoardCell current = gameBoard[x+i][y+j];
-                        if(!current.isMine()){
+                        if(current.isMine()){
                             numberOfNeighbors++;
                         }
                     }
