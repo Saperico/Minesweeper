@@ -7,7 +7,7 @@ public class GUIBoardButton {
     int y;
     int value;
     ButtonState state;
-    JToggleButton button;
+    JToggleButton jToggleButton;
     ActionListener actionListener;
     private MyIcon icon;
     GUIBoardButton(int x, int y, ActionListener actionListener){
@@ -17,7 +17,7 @@ public class GUIBoardButton {
         state = ButtonState.None;
         icon = MyIcon.None;
         this.actionListener = actionListener;
-        button = prepareButton();
+        jToggleButton = prepareButton();
     }
 
     private JToggleButton prepareButton(){
@@ -26,6 +26,7 @@ public class GUIBoardButton {
         button.setIcon(icon.imageIcon);
         button.setMargin(new Insets(0,0,0,0));
         button.setContentAreaFilled(true);
+        button.setName(x +":" + y);
         return button;
     }
 
@@ -34,12 +35,12 @@ public class GUIBoardButton {
             case None:
                 state = ButtonState.Flagged;
                 icon = MyIcon.Flag;
-                button.setIcon(icon.imageIcon);
+                jToggleButton.setIcon(icon.imageIcon);
                 break;
             case Flagged:
                 state = ButtonState.None;
                 icon = MyIcon.None;
-                button.setIcon(icon.imageIcon);
+                jToggleButton.setIcon(icon.imageIcon);
                 break;
             case Pushed:
                 break;
@@ -48,6 +49,6 @@ public class GUIBoardButton {
 
     public void setIcon(MyIcon icon){
         this.icon = icon;
-        button.setIcon(icon.imageIcon);
+        jToggleButton.setIcon(icon.imageIcon);
     }
 }

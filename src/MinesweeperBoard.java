@@ -27,7 +27,7 @@ public class MinesweeperBoard {
             for(int j = 0 ; j < width ; j++)
             {
                 double random = new Random().nextDouble();
-                if(random<0.1)
+                if(random<0.35)
                     gameBoard[i][j].setMine();
             }
         }
@@ -59,7 +59,7 @@ public class MinesweeperBoard {
         return numberOfNeighbors;
     }
 
-    public BoardCell getValue(int x, int y){
+    public BoardCell getCell(int x, int y){
         return this.gameBoard[x][y];
     }
 
