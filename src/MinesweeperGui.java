@@ -15,6 +15,10 @@ public class MinesweeperGui {
     GUIBoardButton[][] boardButtons = new GUIBoardButton[boardHeight][boardWidth];
     ActionListener actionListener;
     boolean rightClick = false;
+    boolean firstLeftClick = true;
+    int flags = 0;
+    int flaggedMines = 0;
+    JLabel flagsLabel;
     MouseListener mouseListener = new MouseAdapter() {
         @Override
         public void mousePressed(MouseEvent e) {
@@ -52,6 +56,12 @@ public class MinesweeperGui {
         testButton.addActionListener(e->test());
         pane.add(testButton);
 
+        JLabel numberOfMines = new JLabel("Mines : "+gameBoard.getNumberOfMines());
+        pane.add(numberOfMines);
+
+        flagsLabel = new JLabel("Flags : 0");
+        pane.add(flagsLabel);
+
         gui.add(pane, BorderLayout.SOUTH);
 
         JFrame f = new JFrame("MineSweeper");
@@ -75,11 +85,32 @@ public class MinesweeperGui {
                         clickedEmpty(current);
                     }
                 }
-            } else
-                current.rightClick();
+            } else {
+                rightClick(current);
+                flagsLabel.setText("Flags " + String.valueOf(flags));
+            }
         }
         else{
             current.jToggleButton.setSelected(true);
+        }
+    }
+
+    public void rightClick(GUIBoardButton button){
+        switch(button.state){
+            case None:
+                button.state = ButtonState.Flagged;
+                button.icon = MyIcon.Flag;
+                button.jToggleButton.setIcon(button.icon.imageIcon);
+                flags+=1;
+                break;
+            case Flagged:
+                button.state = ButtonState.None;
+                button.icon = MyIcon.None;
+                button.jToggleButton.setIcon(button.icon.imageIcon);
+                flags-=1;
+                break;
+            case Pushed:
+                break;
         }
     }
 
@@ -96,7 +127,7 @@ public class MinesweeperGui {
     }
 
     public void clickedEmpty(GUIBoardButton button) {
-        int number_of_adjacent_mines = gameBoard.numberOfMines(button.x, button.y);
+        int number_of_adjacent_mines = gameBoard.neighboringMines(button.x, button.y);
         if(number_of_adjacent_mines == 0)
             collapseZeros(button);
         invisibleClick(button);
@@ -114,35 +145,37 @@ public class MinesweeperGui {
     private int getNumberOfMines(GUIBoardButton button) {
         int x = button.x;
         int y = button.y;
-        return gameBoard.numberOfMines(x,y);
+        return gameBoard.neighboringMines(x,y);
     }
 
-    public void collapseZeros(GUIBoardButton button){
+    public void collapseZeros(GUIBoardButton button) {
         Queue<GUIBoardButton> buttonsQueue = new LinkedList<>();
         buttonsQueue.add(button);
-        while(!buttonsQueue.isEmpty()) {
+        while (!buttonsQueue.isEmpty()) {
             GUIBoardButton currentButton = buttonsQueue.remove();
-            int x = currentButton.x;
-            int y = currentButton.y;
-            if (currentButton.value != 0) {
-                for (int i = -1; i <= 1; i++) {
-                    for (int j = -1; j <= 1; j++) {
-                        if (x + i >= 0 && y + j >= 0 && x + i < boardHeight && y + j < boardWidth) {
-                            if (i != 0 || j != 0) {
-                                int xNext = x + i;
-                                int yNext = y + j;
-                                GUIBoardButton next = boardButtons[xNext][yNext];
-                                BoardCell cell = gameBoard.getCell(xNext, yNext);
-                                if (next.state == ButtonState.None && !cell.isMine()) {
-                                    buttonsQueue.add(next);
-                                    invisibleClick(next);
-                                }
-                            }
+            if (getNumberOfMines(currentButton) == 0) {
+                int x = currentButton.x;
+                int y = currentButton.y;
+                addNeighbors(buttonsQueue,x,y);
+            }
+        }
+    }
+
+    private void addNeighbors(Queue<GUIBoardButton> queue, int x, int y) {
+        for (int i = -1; i <= 1; i++)
+            for (int j = -1; j <= 1; j++)
+                if (x + i >= 0 && y + j >= 0 && x + i < boardHeight && y + j < boardWidth) {
+                    if (i != 0 || j != 0) {
+                        int xNext = x + i;
+                        int yNext = y + j;
+                        GUIBoardButton next = boardButtons[xNext][yNext];
+                        BoardCell cell = gameBoard.getCell(xNext, yNext);
+                        if (next.state == ButtonState.None && !cell.isMine()) {
+                            queue.add(next);
+                            invisibleClick(next);
                         }
                     }
                 }
-            }
-        }
     }
 
     public void resetBoard(){

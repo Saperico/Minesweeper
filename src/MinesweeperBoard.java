@@ -4,13 +4,13 @@ public class MinesweeperBoard {
     private final int height;
     private final int width;
     private final BoardCell[][] gameBoard;
-    private final int numberOfBombs;
+    private int numberOfMines;
 
     public MinesweeperBoard(int height, int width){
         this.height = height;
         this.width = width;
         this.gameBoard = new BoardCell[height][width];
-        numberOfBombs = height*width/2;
+        numberOfMines = 0;
         setUpBoard();
     }
 
@@ -27,8 +27,10 @@ public class MinesweeperBoard {
             for(int j = 0 ; j < width ; j++)
             {
                 double random = new Random().nextDouble();
-                if(random<0.35)
+                if(random<0.35) {
                     gameBoard[i][j].setMine();
+                    numberOfMines++;
+                }
             }
         }
     }
@@ -43,7 +45,7 @@ public class MinesweeperBoard {
         }
     }
 
-    public int numberOfMines(int x, int y){
+    public int neighboringMines(int x, int y){
         int numberOfNeighbors = 0;
         for(int i = -1 ; i < 2; i++){
             for(int j = -1 ; j < 2; j++){
@@ -65,6 +67,10 @@ public class MinesweeperBoard {
 
     public void resetBoard(){
         setUpBoard();
+    }
+
+    public int getNumberOfMines() {
+        return numberOfMines;
     }
 
     public static void main(String[] args){

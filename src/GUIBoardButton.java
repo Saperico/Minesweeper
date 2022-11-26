@@ -9,7 +9,7 @@ public class GUIBoardButton {
     ButtonState state;
     JToggleButton jToggleButton;
     ActionListener actionListener;
-    private MyIcon icon;
+    public MyIcon icon;
     GUIBoardButton(int x, int y, ActionListener actionListener){
         this.x = x;
         this.y = y;
@@ -28,23 +28,6 @@ public class GUIBoardButton {
         button.setContentAreaFilled(true);
         button.setName(x +":" + y);
         return button;
-    }
-
-    public void rightClick(){
-        switch(state){
-            case None:
-                state = ButtonState.Flagged;
-                icon = MyIcon.Flag;
-                jToggleButton.setIcon(icon.imageIcon);
-                break;
-            case Flagged:
-                state = ButtonState.None;
-                icon = MyIcon.None;
-                jToggleButton.setIcon(icon.imageIcon);
-                break;
-            case Pushed:
-                break;
-        }
     }
 
     public void setIcon(MyIcon icon){
