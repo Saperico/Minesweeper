@@ -20,6 +20,13 @@ public class GUIBoardButton {
         jToggleButton = prepareButton();
     }
 
+    public void reset(){
+        state = ButtonState.None;
+        jToggleButton.setSelected(false);
+        jToggleButton.setText(null);
+        setIcon(MyIcon.None);
+    }
+
     private JToggleButton prepareButton(){
         JToggleButton button = new JToggleButton();
         button.addActionListener(actionListener);

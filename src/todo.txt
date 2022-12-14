@@ -1,10 +1,3 @@
-win condition
-lose condition
-board reset
-setting preferred board size -> menu?
-board generation
-difficulty levels -> menu?
-flag counter
 merge boardcell and guiboardbutton
 better icons
 pretty gui

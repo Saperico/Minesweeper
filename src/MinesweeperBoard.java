@@ -1,4 +1,5 @@
-import java.util.Random;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MinesweeperBoard {
     private final int height;
@@ -6,31 +7,78 @@ public class MinesweeperBoard {
     private final BoardCell[][] gameBoard;
     private int numberOfMines;
 
-    public MinesweeperBoard(int height, int width){
+    public MinesweeperBoard(int height, int width, int mines)
+    {
         this.height = height;
         this.width = width;
         this.gameBoard = new BoardCell[height][width];
-        numberOfMines = 0;
+        numberOfMines = mines;
         setUpBoard();
+        pickMines();
+    }
+
+    public MinesweeperBoard(GameDifficulty difficulty)
+    {
+        this.height = difficulty.getHeight();
+        this.width = difficulty.getWidth();
+        this.gameBoard = new BoardCell[height][width];
+        numberOfMines = difficulty.getMines();
+        setUpBoard();
+        pickMines();
+    }
+
+    private void pickMines(){
+        int added = 0;
+        Set<Pair> pairs = new HashSet<>();
+        while(added<numberOfMines) {
+            int randomX = (int) (Math.random() * height);
+            int randomY = (int) (Math.random() * width);
+            Pair current = new Pair(randomX, randomY);
+            if(!pairs.contains(current))
+            {
+                gameBoard[randomX][randomY].setMine(true);
+                pairs.add(current);
+                added++;
+            }
+        }
     }
 
     private void setUpBoard(){
         for(int i = 0 ; i < height ; i ++)
             for (int j = 0; j < width; j++)
-                gameBoard[i][j] = new BoardCell(i, j);
-        randomBoard();
+                gameBoard[i][j] = new BoardCell();
     }
 
-    public void randomBoard(){
-        for(int i = 0 ; i < height ; i++)
+    public void firstClick(int x, int y){
+        for(int i = -1 ; i < 2 ; i++)
         {
-            for(int j = 0 ; j < width ; j++)
+            for(int j = -1; j<2 ; j++)
             {
-                double random = new Random().nextDouble();
-                if(random<0.35) {
-                    gameBoard[i][j].setMine();
-                    numberOfMines++;
+                int x_p = x+i;
+                int y_p = y+j;
+                if(x_p >= 0 & x_p < height & y_p >= 0 & y_p < width)
+                {
+                    BoardCell current = getCell(x_p,y_p);
+                    if(current.isMine()){
+                        current.setMine(false);
+                        moveMine(x,y);
+                    }
                 }
+            }
+        }
+    }
+
+    private void moveMine(int x, int y){
+        boolean foundPlace = false;
+        while(!foundPlace)
+        {
+            int randomX = (int) (Math.random() * height);
+            int randomY = (int) (Math.random() * width);
+            boolean isMine = gameBoard[randomX][randomY].isMine();
+            if(Math.abs(randomX - x)>1 && Math.abs(randomY - y) > 1 && !isMine)
+            {
+                gameBoard[randomX][randomY].setMine(true);
+                foundPlace = true;
             }
         }
     }
@@ -65,16 +113,44 @@ public class MinesweeperBoard {
         return this.gameBoard[x][y];
     }
 
-    public void resetBoard(){
-        setUpBoard();
+    public int getHeight(){
+        return this.height;
+    }
+
+    public int getWidth(){
+        return this.width;
+    }
+
+    public int getMines(){
+        return this.numberOfMines;
     }
 
     public int getNumberOfMines() {
         return numberOfMines;
     }
 
+    private static class Pair{
+        int first;
+        int second;
+
+        public Pair(int x, int y)
+        {
+            first = x;
+            second =y;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(obj instanceof Pair)
+            {
+                return this.first == ((Pair) obj).first && this.second == ((Pair) obj).second;
+            }
+            return false;
+        }
+    }
+
     public static void main(String[] args){
-        MinesweeperBoard board = new MinesweeperBoard(10,5);
-        board.showBoard();
+        MinesweeperBoard board2 = new MinesweeperBoard(10,5,2);
+        board2.showBoard();
     }
 }
