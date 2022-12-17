@@ -1,4 +1,5 @@
 merge boardcell and guiboardbutton
 better icons
 pretty gui
-
+flag on mine left click
+flag on first move
